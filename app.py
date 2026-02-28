@@ -1,171 +1,189 @@
 import os
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score
-import joblib
-from flask import Flask, render_template, request, redirect, url_for
 import numpy as np
-from config import config
+import streamlit as st
+import joblib
 
-# Get environment from FLASK_ENV or default to production
-env = os.environ.get('FLASK_ENV', 'production')
-app = Flask(__name__)
-app.config.from_object(config.get(env, config['production']))
+# Get environment
+env = os.environ.get('STREAMLIT_ENV', 'production')
 
 # Model and data files
 MODEL_FILE = 'heart_model.pkl'
 SCALER_FILE = 'heart_scaler.pkl'
 COLUMNS_FILE = 'model_columns.pkl'
-DATA_FILE = 'heart.csv'
 
-def train_model():
-    """Train and save the heart disease prediction model"""
-    print("Training model...")
-    data = pd.read_csv(DATA_FILE)
-    
-    # The target column is 'target' in heart.csv
-    target_col = "target"
-    
-    if target_col in data.columns:
-        data = data.dropna(subset=[target_col])
-    
-    numeric_cols = data.select_dtypes(include=["int64", "float64"]).columns
-    categorical_cols = data.select_dtypes(include=["object", "string"]).columns
-    
-    data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].median())
-    for col in categorical_cols:
-        if col != target_col:
-            data[col] = data[col].fillna(data[col].mode()[0])
-    
-    # Separate features and target before one-hot encoding
-    y = data[target_col]
-    X = data.drop(target_col, axis=1)
-    
-    # One-hot encode only the features
-    X = pd.get_dummies(X, drop_first=True)
-    
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-    
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-    
-    model = LogisticRegression(max_iter=5000)
-    model.fit(X_train, y_train)
-    
-    predictions = model.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    print(f"Model Accuracy: {accuracy}")
-    
-    joblib.dump(model, MODEL_FILE)
-    joblib.dump(scaler, SCALER_FILE)
-    joblib.dump(list(X.columns), COLUMNS_FILE)
-    
-    print("Model saved successfully!")
-    return model, scaler, list(X.columns)
-
+@st.cache_resource
 def load_model():
-    """Load the model or train if not exists"""
-    if os.path.exists(MODEL_FILE) and os.path.exists(SCALER_FILE) and os.path.exists(COLUMNS_FILE):
+    """Load the model and scaler"""
+    try:
         model = joblib.load(MODEL_FILE)
         scaler = joblib.load(SCALER_FILE)
         columns = joblib.load(COLUMNS_FILE)
-        print("Model loaded successfully!")
-    else:
-        print("Model not found. Training new model...")
-        model, scaler, columns = train_model()
-    return model, scaler, columns
+        st.success("Model loaded successfully!")
+        return model, scaler, columns
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None, None, None
 
-# Load model at startup
+# Load model
 model, scaler, model_columns = load_model()
 
-@app.route('/')
-def home():
-    """Render the home page"""
-    return render_template('home.html')
+# Page config
+st.set_page_config(
+    page_title="Heart Disease Prediction",
+    page_icon="❤️",
+    layout="centered"
+)
 
-@app.route('/about')
-def about():
-    """Render the about page"""
-    return render_template('about.html')
+# Custom CSS
+st.markdown("""
+<style>
+    .main {
+        background-color: #f5f5f5;
+    }
+    .stButton>button {
+        width: 100%;
+        background-color: #ff4b4b;
+        color: white;
+    }
+    .stButton>button:hover {
+        background-color: #ff6b6b;
+    }
+    .prediction-box {
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-@app.route('/predict', methods=['GET'])
-def predict_page():
-    """Render the prediction form page"""
-    return render_template('predict.html')
-
-@app.route('/result', methods=['POST'])
-def result():
-    """Make prediction based on user input"""
-    try:
-        # Get input values from form
-        age = float(request.form['age'])
-        sex = int(request.form['sex'])
-        cp = int(request.form['cp'])
-        trestbps = float(request.form['trestbps'])
-        chol = float(request.form['chol'])
-        fbs = int(request.form['fbs'])
-        restecg = int(request.form['restecg'])
-        thalach = float(request.form['thalach'])
-        exang = int(request.form['exang'])
-        oldpeak = float(request.form['oldpeak'])
-        slope = int(request.form['slope'])
-        ca = int(request.form['ca'])
-        thal = int(request.form['thal'])
-        
-        # Create input dataframe
-        input_data = {
-            'age': age,
-            'sex': sex,
-            'cp': cp,
-            'trestbps': trestbps,
-            'chol': chol,
-            'fbs': fbs,
-            'restecg': restecg,
-            'thalach': thalach,
-            'exang': exang,
-            'oldpeak': oldpeak,
-            'slope': slope,
-            'ca': ca,
-            'thal': thal
-        }
-        
-        # Create dataframe with all columns
-        input_df = pd.DataFrame([input_data])
-        
-        # Add missing columns with 0
-        for col in model_columns:
-            if col not in input_df.columns:
-                input_df[col] = 0
-        
-        # Reorder columns to match training data
-        input_df = input_df[model_columns]
-        
-        # Scale the input
-        input_scaled = scaler.transform(input_df)
-        
-        # Make prediction
-        prediction = model.predict(input_scaled)[0]
-        probability = model.predict_proba(input_scaled)[0]
-        
-        result_text = "Heart Disease Detected" if prediction == 1 else "No Heart Disease"
-        confidence = probability[prediction] * 100
-        
-        # Store data for display
-        patient_data = input_data
-        
-        return render_template('result.html', 
-                             result=result_text, 
-                             confidence=f"{confidence:.2f}",
-                             prediction=prediction,
-                             patient_data=patient_data)
+def main():
+    st.title("❤️ Heart Disease Prediction")
+    st.markdown("### Enter your health information below")
     
-    except Exception as e:
-        return render_template('predict.html', error=str(e))
+    # Create columns for input layout
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        age = st.number_input("Age", min_value=1, max_value=120, value=50)
+        sex = st.selectbox("Sex", options=[("Male", 1), ("Female", 0)], format_func=lambda x: x[0])
+        sex = sex[1] if isinstance(sex, tuple) else sex
+        cp = st.selectbox("Chest Pain Type", options=[
+            ("Typical Angina", 0),
+            ("Atypical Angina", 1),
+            ("Non-anginal Pain", 2),
+            ("Asymptomatic", 3)
+        ], format_func=lambda x: x[0])
+        cp = cp[1] if isinstance(cp, tuple) else cp
+        trestbps = st.number_input("Resting Blood Pressure (mm Hg)", min_value=50, max_value=250, value=120)
+        chol = st.number_input("Serum Cholesterol (mg/dl)", min_value=100, max_value=600, value=200)
+        fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl", options=[("No", 0), ("Yes", 1)], format_func=lambda x: x[0])
+        fbs = fbs[1] if isinstance(fbs, tuple) else fbs
+    
+    with col2:
+        restecg = st.selectbox("Resting ECG", options=[
+            ("Normal", 0),
+            ("ST-T Wave Abnormality", 1),
+            ("Left Ventricular Hypertrophy", 2)
+        ], format_func=lambda x: x[0])
+        restecg = restecg[1] if isinstance(restecg, tuple) else restecg
+        thalach = st.number_input("Maximum Heart Rate Achieved", min_value=50, max_value=250, value=150)
+        exang = st.selectbox("Exercise Induced Angina", options=[("No", 0), ("Yes", 1)], format_func=lambda x: x[0])
+        exang = exang[1] if isinstance(exang, tuple) else exang
+        oldpeak = st.number_input("ST Depression Induced by Exercise", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
+        slope = st.selectbox("Slope of Peak Exercise ST Segment", options=[
+            ("Upsloping", 0),
+            ("Flat", 1),
+            ("Downsloping", 2)
+        ], format_func=lambda x: x[0])
+        slope = slope[1] if isinstance(slope, tuple) else slope
+        ca = st.selectbox("Number of Major Vessels Colored by Fluoroscopy", options=[0, 1, 2, 3], index=0)
+        thal = st.selectbox("Thalassemia", options=[
+            ("Normal", 1),
+            ("Fixed Defect", 2),
+            ("Reversable Defect", 3)
+        ], format_func=lambda x: x[0])
+        thal = thal[1] if isinstance(thal, tuple) else thal
+    
+    st.markdown("---")
+    
+    # Predict button
+    if st.button("Predict Heart Disease Risk"):
+        if model is not None and scaler is not None:
+            try:
+                # Create input data
+                input_data = {
+                    'age': age,
+                    'sex': sex,
+                    'cp': cp,
+                    'trestbps': trestbps,
+                    'chol': chol,
+                    'fbs': fbs,
+                    'restecg': restecg,
+                    'thalach': thalach,
+                    'exang': exang,
+                    'oldpeak': oldpeak,
+                    'slope': slope,
+                    'ca': ca,
+                    'thal': thal
+                }
+                
+                # Create dataframe with all columns
+                input_df = pd.DataFrame([input_data])
+                
+                # Add missing columns with 0
+                for col in model_columns:
+                    if col not in input_df.columns:
+                        input_df[col] = 0
+                
+                # Reorder columns to match training data
+                input_df = input_df[model_columns]
+                
+                # Scale the input
+                input_scaled = scaler.transform(input_df)
+                
+                # Make prediction
+                prediction = model.predict(input_scaled)[0]
+                probability = model.predict_proba(input_scaled)[0]
+                
+                # Display results
+                st.markdown("---")
+                st.subheader("📊 Prediction Results")
+                
+                if prediction == 1:
+                    st.error("⚠️ Heart Disease Detected!")
+                    confidence = probability[1] * 100
+                    st.progress(int(confidence))
+                    st.write(f"**Confidence:** {confidence:.2f}%")
+                    st.warning("Please consult with a healthcare professional for further evaluation.")
+                else:
+                    st.success("✅ No Heart Disease Detected")
+                    confidence = probability[0] * 100
+                    st.progress(int(confidence))
+                    st.write(f"**Confidence:** {confidence:.2f}%")
+                    st.info("Your heart appears healthy! Maintain a healthy lifestyle.")
+                
+                # Show additional info
+                with st.expander("See Input Summary"):
+                    st.write(input_data)
+                    
+            except Exception as e:
+                st.error(f"Error during prediction: {e}")
+        else:
+            st.error("Model not loaded. Please check the model files.")
+    
+    # Info section
+    st.markdown("---")
+    st.markdown("""
+    ### ℹ️ About This App
+    This Heart Disease Prediction App uses Machine Learning to predict the likelihood of heart disease 
+    based on various health indicators. The model was trained on the UCI Heart Disease dataset 
+    using Logistic Regression algorithm.
+    
+    **Note:** This prediction is for educational purposes only and should not be used as medical advice.
+    Always consult with a qualified healthcare professional for any medical concerns.
+    """)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    main()
