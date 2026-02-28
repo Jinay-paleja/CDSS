@@ -4,6 +4,13 @@ import numpy as np
 import streamlit as st
 import joblib
 
+# Page config must be first
+st.set_page_config(
+    page_title="Heart Disease Prediction",
+    page_icon="❤️",
+    layout="centered"
+)
+
 # Get environment
 env = os.environ.get('STREAMLIT_ENV', 'production')
 
@@ -27,13 +34,6 @@ def load_model():
 
 # Load model
 model, scaler, model_columns = load_model()
-
-# Page config
-st.set_page_config(
-    page_title="Heart Disease Prediction",
-    page_icon="❤️",
-    layout="centered"
-)
 
 # Custom CSS
 st.markdown("""
