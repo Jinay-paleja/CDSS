@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result - HeartCare AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #8b5cf6;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 120px 5% 60px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .result-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 2rem;
+        }
+        
+        .result-icon.positive {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+        }
+        
+        .result-icon.negative {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .result-title.positive {
+            color: var(--danger);
+        }
+        
+        .result-title.negative {
+            color: var(--success);
+        }
+        
+        .result-subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .confidence-box {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .confidence-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .confidence-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+        
+        .confidence-fill.positive {
+            background: linear-gradient(90deg, var(--danger), #f87171);
+        }
+        
+        .confidence-fill.negative {
+            background: linear-gradient(90deg, var(--success), #34d399);
+        }
+        
+        /* Patient Data */
+        .patient-data {
+            text-align: left;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .patient-data h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .data-item {
+            background: var(--light);
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .data-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Disclaimer */
+        .disclaimer {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #92400e;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .result-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .confidence-value {
+                font-size: 2.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-icon">❤️</div>
+            <span>HeartCare AI</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/predict">Predict</a></li>
+        </ul>
+        <a href="/predict" class="btn btn-primary">New Prediction</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="result-card">
+            <div class="result-icon {% if prediction == 1 %}positive{% else %}negative{% endif %}">
+                {% if prediction == 1 %}⚠️{% else %}✅{% endif %}
+            </div>
+            
+            <h1 class="result-title {% if prediction == 1 %}positive{% else %}negative{% endif %}">
+                {{ result }}
+            </h1>
+            
+            <p class="result-subtitle">
+                {% if prediction == 1 %}
+                The model indicates a high risk of heart disease based on the provided clinical parameters.
+                {% else %}
+                The model indicates a low risk of heart disease based on the provided clinical parameters.
+                {% endif %}
+            </p>
+            
+            <div class="confidence-box">
+                <div class="confidence-label">Prediction Confidence</div>
+                <div class="confidence-value">{{ confidence }}%</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill {% if prediction == 1 %}positive{% else %}negative{% endif %}" style="width: {{ confidence }}%"></div>
+                </div>
+            </div>
+            
+            <!-- Patient Data Summary -->
+            <div class="patient-data">
+                <h3>📋 Input Parameters Summary</h3>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Age</div>
+                        <div class="data-value">{{ patient_data.age }} years</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Sex</div>
+                        <div class="data-value">{% if patient_data.sex == 1 %}Male{% else %}Female{% endif %}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Blood Pressure</div>
+                        <div class="data-value">{{ patient_data.trestbps }} mmHg</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Cholesterol</div>
+                        <div class="data-value">{{ patient_data.chol }} mg/dl</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Max Heart Rate</div>
+                        <div class="data-value">{{ patient_data.thalach }}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Chest Pain Type</div>
+                        <div class="data-value">
+                            {% if patient_data.cp == 0 %}Typical Angina
+                            {% elif patient_data.cp == 1 %}Atypical Angina
+                            {% elif patient_data.cp == 2 %}Non-anginal
+                            {% else %}Asymptomatic{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/predict" class="btn btn-primary">Make Another Prediction</a>
+                <a href="/" class="btn" style="background: var(--gray); color: white;">Back to Home</a>
+            </div>
+            
+            <!-- Disclaimer -->
+            <div class="disclaimer">
+                <strong>⚠️ Disclaimer:</strong> This prediction is for educational and screening purposes only. It should not be used as a substitute for professional medical advice, diagnosis, or treatment. Please consult a qualified healthcare provider for proper medical evaluation.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

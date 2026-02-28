@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - HeartCare AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #8b5cf6;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .main-content {
+            padding: 120px 5% 60px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .content-card p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        
+        .feature-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gray);
+        }
+        
+        .feature-list li::before {
+            content: "✓";
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .tech-item {
+            background: var(--light);
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 5%;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        
+        footer p {
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .content-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-icon">❤️</div>
+            <span>HeartCare AI</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/predict">Predict</a></li>
+        </ul>
+        <a href="/predict" class="btn btn-primary">Get Started</a>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>About HeartCare AI</h1>
+            <p>Advanced Clinical Decision Support System for Heart Disease Prediction</p>
+        </div>
+        
+        <div class="content-card">
+            <h2>What is HeartCare AI?</h2>
+            <p>HeartCare AI is an advanced Clinical Decision Support System (CDSS) that uses machine learning to help healthcare professionals predict heart disease risk. Our system analyzes multiple clinical parameters to provide accurate and instant heart disease predictions.</p>
+            <p>The AI model has been trained on comprehensive heart disease datasets and achieves an accuracy rate of over 85%, making it a reliable tool for initial heart disease screening.</p>
+        </div>
+        
+        <div class="content-card">
+            <h2>Key Features</h2>
+            <ul class="feature-list">
+                <li>High-accuracy machine learning predictions</li>
+                <li>Instant analysis and results</li>
+                <li>User-friendly interface for healthcare professionals</li>
+                <li>Comprehensive clinical parameter analysis</li>
+                <li>Secure and private data processing</li>
+                <li>Confidence score for each prediction</li>
+            </ul>
+        </div>
+        
+        <div class="content-card">
+            <h2>Technology Stack</h2>
+            <p>Our system is built using modern technologies:</p>
+            <div class="tech-stack">
+                <div class="tech-item">Python</div>
+                <div class="tech-item">Flask</div>
+                <div class="tech-item">Scikit-learn</div>
+                <div class="tech-item">Logistic Regression</div>
+                <div class="tech-item">HTML/CSS</div>
+                <div class="tech-item">Machine Learning</div>
+            </div>
+        </div>
+        
+        <div class="content-card">
+            <h2>How It Works</h2>
+            <p>The system uses Logistic Regression, a proven machine learning algorithm, to analyze 13 clinical parameters including:</p>
+            <ul class="feature-list">
+                <li>Age and gender</li>
+                <li>Chest pain type</li>
+                <li>Blood pressure and cholesterol levels</li>
+                <li>Heart rate measurements</li>
+                <li>Exercise-induced angina</li>
+                <li>And other clinical indicators</li>
+            </ul>
+        </div>
+        
+        <div class="content-card">
+            <h2>Disclaimer</h2>
+            <p>This tool is for educational and screening purposes only. The predictions made by this system should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for proper medical evaluation.</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2024 HeartCare AI. All rights reserved. For medical professional use only.</p>
+    </footer>
+</body>
+</html>
